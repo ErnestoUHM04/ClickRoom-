@@ -1,0 +1,38 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: Hotel_Reservation
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/hotel_reservation
+    username: root
+    password: cromosomab
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+  sql:
+    init:
+      mode: always
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    display-request-duration: true
+    doc-expansion: none
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
+info:
+  title: Hotel Reservation API
+  description: API para reservar habitaciones de hotel
+  version: 1.0.0

@@ -1,0 +1,293 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.hotel-destacado{
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  display: flex;
+}
+.App-link {
+  color: #61dafb;
+}
+.App-link:hover {
+  color: #fff;
+}
+
+.App-header {
+  background-color: #00163a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 30px;
+}
+
+/* IZQUIERDA */
+.logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.logo img {
+  height: 40px;
+}
+
+/* CENTRO (buscador alineado a la derecha) */
+.search-bar {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+.search-bar input {
+  width: 250px;
+  padding: 8px 35px 8px 15px;
+  border: 2px solid #f9c300;
+  border-radius: 30px;
+  outline: none;
+  background-color: transparent;
+  color: white;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="white" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20"><path d="M0 0h24v24H0z" fill="none"/><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l4.99 4.99 1.49-1.49L15.5 14zm-6 0C8.01 14 6 11.99 6 9.5S8.01 5 10.5 5 15 7.01 15 9.5 12.99 14 10.5 14z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 20px;
+}
+
+/* DERECHA */
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: 20px;
+}
+
+.header-icons img {
+  width: 40px;
+  height: 40px;
+}
+
+.header-icons button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+.header-icons button:last-child {
+  color: #f9c300; /* amarillo para el perfil */
+}
+
+.funcion-boton {
+  background-color: #f9c300;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 20px 10px 15px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.funcion-boton:hover {
+  background-color: #e5b100;
+}
+
+/* Iconos dentro del botón */
+.funcion-boton img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.popup-destinos {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  background-color: white;
+  color: #00163a;
+  border: 2px solid #00163a;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  z-index: 1000;
+  width: 280px;
+}
+
+.popup-titulo {
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  margin-top: 0;
+}
+
+.popup-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.popup-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 2px solid #00163a;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.popup-item:hover {
+  background-color: #f1f1f1;
+}
+
+.popup-item.seleccionado {
+  border-bottom: 2px solid #a060e8; /* Línea morada */
+}
+
+.icono-ubicacion {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.campo-fecha {
+  background-color: white;
+  border: 2px solid #f9c300;
+  border-radius: 15px;
+  padding: 6px 10px;
+  font-size: 16px;
+  color: #00163a;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: border-color 0.3s;
+  width: 250px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.campo-fecha:focus {
+  outline: none;
+  border-color: #f9c300; /* amarillo en foco */
+}
+
+.campo-fecha::-webkit-calendar-picker-indicator {
+  filter: invert(18%) sepia(90%) saturate(650%) hue-rotate(180deg);
+}
+
+.pestana-emergente-huespedes {
+  position: absolute;
+  background: #fff;
+  border: 2px solid #00163a;
+  border-radius: 15px;
+  padding: 20px;
+  width: 250px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  top: 50px;
+}
+
+.fila-huespedes {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.etiqueta {
+  font-weight: bold;
+  color: #00163a;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.control button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  color: #00163a;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  line-height: 1;
+}
+
+hr {
+  border: none;
+  border-top: 2px solid #00163a;
+  margin: 0 0 10px 0;
+}
+.hotel-card{
+  border: 2px solid #00163a;
+  border-radius: 15px;
+  padding: 20px;
+  width: 250px;
+  cursor: pointer;
+  background-color: #fff;
+  color: #00163a;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+.boton{
+  margin-top: 12px;
+  padding: 10px 30px;
+  background-color: #f9c300;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  align-self: center;
+  transition: background 0.2s ease;
+}
+.boton-buscar-popup {
+  margin-top: 12px;
+  padding: 10px 30px;
+  background-color: #f9c300;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  align-self: center;
+  transition: background 0.2s ease;
+}
+
+.boton-buscar-popup:hover {
+  background-color: #e5b100;
+}
+
+
