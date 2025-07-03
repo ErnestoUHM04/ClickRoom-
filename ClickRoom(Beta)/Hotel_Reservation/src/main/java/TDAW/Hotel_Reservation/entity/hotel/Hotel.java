@@ -1,7 +1,6 @@
 package TDAW.Hotel_Reservation.entity.hotel;
 
 import TDAW.Hotel_Reservation.entity.promotion.Promotion;
-import TDAW.Hotel_Reservation.entity.review.Review;
 import TDAW.Hotel_Reservation.entity.room.Room;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,7 +38,4 @@ public class Hotel {
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Room> rooms = new ArrayList<>();
-
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Review> reviews = new ArrayList<>();
 }

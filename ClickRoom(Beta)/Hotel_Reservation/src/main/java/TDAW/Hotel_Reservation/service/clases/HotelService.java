@@ -56,7 +56,6 @@ public class HotelService implements IHotelService {
                 hotelDTO.checkOutTime(),
                 hotelDTO.description(),
                 new ArrayList<>(),
-                new ArrayList<>(),
                 new ArrayList<>()
                 );
 
@@ -88,6 +87,12 @@ public class HotelService implements IHotelService {
     @Override
     public Hotel findByName(String name) {
         Hotel hotel = hotelRepository.findByName(name);
+        if(hotel == null) throw new RuntimeException("Hotel not found");
+        return hotel;
+    }
+
+    public Hotel findByCity(String city) {
+        Hotel hotel = hotelRepository.findByCity(city);
         if(hotel == null) throw new RuntimeException("Hotel not found");
         return hotel;
     }

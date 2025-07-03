@@ -33,7 +33,7 @@ public class Reservation {
     private LocalDate checkOut;
 
     @Enumerated(EnumType.STRING)
-    private ReservationStatus status = ReservationStatus.PENDING;
+    private ReservationStatus status = ReservationStatus.PENDIENTE;
 
     private BigDecimal total;
     private BigDecimal discount;

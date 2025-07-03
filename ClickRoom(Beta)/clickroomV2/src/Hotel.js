@@ -40,7 +40,7 @@ function Hotel() {
 
   // Estados para filtros
   const [pestanaActiva, setPestanaActiva] = useState(null);
-  const [destino, setDestino] = useState('');
+  const [destinoSeleccionado, setDestinoSeleccionado] = useState('');
   const [llegada, setLlegada] = useState('');
   const [salida, setSalida] = useState('');
   const [adultos, setAdultos] = useState(2);
@@ -53,6 +53,24 @@ function Hotel() {
   const [usuario, setUsuario] = useState(null);
   const [popupReservasAbierto, setPopupReservasAbierto] = useState(false);
   const [reservas, setReservas] = useState([]);
+  // Estado para sugerencias de ciudades
+    const [allCities, setAllCities] = useState([]);
+    const [citySuggestions, setCitySuggestions] = useState([]);
+    // Cargar todas las ciudades al montar
+    useEffect(() => {
+      fetch('/hotel/search/all?page=0&size=1000&sort=city')
+        .then(res => res.json())
+        .then(data => {
+          const list = Array.isArray(data.content)
+            ? data.content
+            : Array.isArray(data)
+              ? data
+              : [];
+          const cities = [...new Set(list.map(h => h.city))];
+          setAllCities(cities);
+        })
+        .catch(() => setAllCities([]));
+    }, []);
   // Cargar usuario desde localStorage al montar
   useEffect(() => {
     const savedUser = localStorage.getItem("usuario");
@@ -127,7 +145,7 @@ function Hotel() {
 
   const handleBuscar = () => {
     const params = new URLSearchParams({
-      destino,
+      destinoSeleccionado,
       llegada,
       salida,
       adultos,
@@ -147,14 +165,14 @@ function Hotel() {
     if (e.key && e.key !== 'Enter') return;
 
     let params;
-    if (!destino || destino.trim() === '') {
+    if (!destinoSeleccionado || destinoSeleccionado.trim() === '') {
       // Buscar todos los hoteles
       params = new URLSearchParams({
         todos: true
       });
     } else {
       params = new URLSearchParams({
-        destino: destino
+        destinoSeleccionado: destinoSeleccionado
       });
     }
 
@@ -315,12 +333,22 @@ function Hotel() {
         </div>
 
         {/* Barra de búsqueda */}
-        <div className="search-bar">
+        <div className="search-bar" style={{ position: 'relative' }}>
           <input
             type="text"
             placeholder="¿A dónde vas?"
-            value={destino}
-            onChange={e => setDestino(e.target.value)}
+            value={destinoSeleccionado}
+            onChange={e => {
+              const val = e.target.value;
+              setDestinoSeleccionado(val);
+              if (val.trim()) {
+                setCitySuggestions(
+                  allCities.filter(c => c.toLowerCase().includes(val.toLowerCase())).slice(0, 5)
+                );
+              } else {
+                setCitySuggestions([]);
+              }
+            }}
             onKeyDown={handleGlobalSearch}
           />
           <button
@@ -330,6 +358,38 @@ function Hotel() {
           >
             Hoteles
           </button>
+          {citySuggestions.length > 0 && (
+            <ul
+              className="suggestions-list"
+              style={{
+                position: 'absolute',
+                top: '40px',
+                right: 0,
+                width: '200px',
+                maxHeight: '150px',
+                overflowY: 'auto',
+                background: '#fff',
+                border: '1px solid #ddd',
+                listStyle: 'none',
+                margin: 0,
+                padding: '5px',
+                zIndex: 2000
+              }}
+            >
+              {citySuggestions.map((c, i) => (
+                <li
+                  key={i}
+                  style={{ padding: '6px', cursor: 'pointer' }}
+                  onClick={() => {
+                    setDestinoSeleccionado(c);
+                    setCitySuggestions([]);
+                  }}
+                >
+                  {c}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="header-icons">
@@ -404,8 +464,8 @@ function Hotel() {
                 marginBottom: 8,
                 padding: '8px',
                 borderRadius: '6px',
-                border: '1px solid #f9c300',
-                background: '#f9c300',
+                border: '1px solid #325daf',
+                background: '#325daf',
                 color: '#fff',
                 cursor: 'pointer'
               }}
@@ -421,9 +481,9 @@ function Hotel() {
                 width: '100%',
                 padding: '8px',
                 borderRadius: '6px',
-                border: '1px solid #f9c300',
+                border: '1px solid #325daf',
                 background: '#fff',
-                color: '#f9c300',
+                color: '#325daf',
                 cursor: 'pointer'
               }}
               onClick={() => {
@@ -475,8 +535,8 @@ function Hotel() {
             width: '100%',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
-            background: '#f9c300',
+            border: '1px solid #325daf',
+            background: '#325daf',
             color: '#fff',
             cursor: 'pointer'
           }}
@@ -492,7 +552,7 @@ function Hotel() {
             borderRadius: '6px',
             border: '1px solid #ccc',
             background: '#fff',
-            color: '#f9c300',
+            color: '#325daf',
             cursor: 'pointer'
           }}
           onClick={() => setMostrarLogin(false)}
@@ -501,7 +561,9 @@ function Hotel() {
         </button>
       </form>
     ) : (
+      
       <form onSubmit={handleRegistroSubmit}>
+        <div className='registro-form'>
         <h3 style={{ marginBottom: 16 }}>Registro</h3>
 
         <input
@@ -650,8 +712,8 @@ function Hotel() {
             width: '100%',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
-            background: '#f9c300',
+            border: '1px solid #325daf',
+            background: '#325daf',
             color: '#fff',
             cursor: 'pointer'
           }}
@@ -665,15 +727,16 @@ function Hotel() {
             marginTop: '8px',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #ccc',
+            border: '1px solid #325daf',
             background: '#fff',
-            color: '#f9c300',
+            color: '#325daf',
             cursor: 'pointer'
           }}
           onClick={() => setMostrarRegistro(false)}
         >
           Volver
         </button>
+        </div>
       </form>
     )}
   </div>
@@ -697,6 +760,7 @@ function Hotel() {
   >
     {!usuario ? (
       <>
+      <div className='resrvas_IS'>
         <p>No has iniciado sesión. Por favor, inicia sesión para ver tus reservas.</p>
         <button
           style={{
@@ -704,8 +768,8 @@ function Hotel() {
             marginBottom: '10px',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
-            background: '#f9c300',
+            border: '1px solid #325daf',
+            background: '#325daf',
             color: '#fff',
             cursor: 'pointer'
           }}
@@ -725,9 +789,9 @@ function Hotel() {
             width: '100%',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
+            border: '1px solid #325daf',
             background: '#fff',
-            color: '#f9c300',
+            color: '#325daf',
             cursor: 'pointer'
           }}
           onClick={() => {
@@ -738,6 +802,7 @@ function Hotel() {
         >
           Registrarse
         </button>
+        </div>
       </>
     ) : (
       <>
@@ -885,28 +950,38 @@ function Hotel() {
           <div style={{ position: 'relative' }}>
             <button
               className="funcion-boton"
-              onClick={() => setPestanaActiva(pestanaActiva === 'destino' ? null : 'destino')}
+              onClick={() => setPestanaActiva(pestanaActiva === 'destinoSeleccionado' ? null : 'destinoSeleccionado')}
             >
               <img src="https://img.icons8.com/ios-filled/50/ffffff/airport.png" alt="avión" />
-              ¿A dónde vas? {destino && `→ ${destino}`}
+              ¿A dónde vas? {destinoSeleccionado && `→ ${destinoSeleccionado}`}
             </button>
 
-            {pestanaActiva === 'destino' && (
-              <div className="popup-destinos">
+            {pestanaActiva === 'destinoSeleccionado' && (
+              <div
+                className="popup-destinos"
+                style={{
+                  position: 'absolute',
+                  top: '50px',
+                  left: 0,
+                  background: '#fff',
+                  borderRadius: '10px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  padding: '20px',
+                  zIndex: 2000,
+                  width: '240px',
+                  maxHeight: '300px',
+                  overflowY: 'auto'
+                }}
+              >
                 <h3 className="popup-titulo">Destinos Populares</h3>
-                <ul className="popup-lista">
-                  {[
-                    "Acapulco, Guerrero - México",
-                    "Cancún, Quintana Roo - México",
-                    "Cuernavaca, Morelos - México",
-                    "Puerto Vallarta, Jalisco - México",
-                    "Huatulco, Oaxaca - México"
-                  ].map((dest, i) => (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {allCities.map((city, idx) => (
                     <li
-                      key={i}
-                      className={`popup-item ${destino === dest ? 'seleccionado' : ''}`}
+                      key={idx}
+                      className={`popup-item ${destinoSeleccionado === city ? 'seleccionado' : ''}`}
+                      style={{ padding: '8px', borderBottom: '1px solid #eee', cursor: 'pointer' }}
                       onClick={() => {
-                        setDestino(dest);
+                        setDestinoSeleccionado(city);
                         setPestanaActiva(null);
                       }}
                     >
@@ -915,7 +990,7 @@ function Hotel() {
                         alt="ubicación"
                         className="icono-ubicacion"
                       />
-                      <span>{dest}</span>
+                      <span>{city}</span>
                     </li>
                   ))}
                 </ul>
@@ -1002,6 +1077,8 @@ function Hotel() {
           </div>
         </div>
 
+        <div className='H_desc'>
+
         <h1 style={{ textAlign: 'center' }}>{hotel.name}</h1>
       <p style={{ textAlign: 'center' }}>Estrellas: {hotel.stars}</p>
       <p style={{ textAlign: 'center' }}>Ciudad: {hotel.city}, {hotel.country}</p>
@@ -1034,7 +1111,7 @@ function Hotel() {
           </li>
         ))}
       </ul>
-
+</div>
       {/* Botón Reservar */}
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <button
@@ -1067,6 +1144,7 @@ function Hotel() {
             overflowY: 'auto'
           }}
         >
+          <div className='reserva'>
           {!usuario ? (
             <>
               <p>No has iniciado sesión. Por favor, inicia sesión para hacer una reserva.</p>
@@ -1080,7 +1158,9 @@ function Hotel() {
                 e.preventDefault();
                 handleReservate();
               }}>
+               
                 <h3>Hacer Reservación</h3>
+                
                 <label>Tipo de Habitación:</label>
                 <select value={resRoomTypeId} onChange={e => setResRoomTypeId(e.target.value)} required>
                   <option value="">Selecciona</option>
@@ -1114,14 +1194,19 @@ function Hotel() {
                   </pre>
                 </div>
               )}
+            
             </>
           )}
+          </div>
         </div>
       )}
 
       <footer style={{ background: '#00163a', color: '#fff', padding: '20px', textAlign: 'center', marginTop: '30px' }}>
+        <p><a href='/terycon'>Términos y Condiciones de Uso</a></p>
+        <p><a href='/avPriv'>Aviso de privacidad</a></p>
+        <p><a href='/avLeg'>Avisos legales</a></p>
         <p><b>©2025 ClickRoom. Todos los derechos reservados.</b></p>
-        <p>Desarrollado por Siminbikini</p>
+        <p>Desarrollado por <b>Siminbikini</b></p>
       </footer>
     </div>
   );

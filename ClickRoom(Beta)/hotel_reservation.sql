@@ -1,3 +1,4 @@
+-- Database: hotel_reservation NO CORRER ESTE SCRIPT UNA VEZ ESTE EN LÍNEA EL BACKEND
 create table amenity (amenity_id bigint not null auto_increment, icon varchar(255), name varchar(255), primary key (amenity_id)) engine=InnoDB;
 create table hotel (check_in_time time(6), check_out_time time(6), stars integer, hotel_id bigint not null auto_increment, address varchar(255), city varchar(255), country varchar(255), description varchar(255), email varchar(255), name varchar(255), phone varchar(255), postal_code varchar(255), primary key (hotel_id)) engine=InnoDB;
 create table promotion (discount_percent decimal(38,2), end_date date, max_uses integer, start_date date, hotel_id bigint, promotion_id bigint not null auto_increment, code varchar(255), primary key (promotion_id)) engine=InnoDB;

@@ -1,6 +1,7 @@
 package TDAW.Hotel_Reservation.service.clases;
 
 import TDAW.Hotel_Reservation.dto.reservation.ReservationDTO;
+import TDAW.Hotel_Reservation.dto.reservation.ReservationNewStatus;
 import TDAW.Hotel_Reservation.dto.reservation.ReservationResponse;
 import TDAW.Hotel_Reservation.dto.reservation.ReservationUpdateDTO;
 import TDAW.Hotel_Reservation.entity.hotel.Hotel;
@@ -84,7 +85,7 @@ public class ReservationService {
 
         reservation.setCheckIn(request.checkIn());
         reservation.setCheckOut(request.checkOut());
-        reservation.setStatus(ReservationStatus.PENDING);
+        reservation.setStatus(ReservationStatus.PENDIENTE);
 
         // Persistimos inicialmente para obtener el ID
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -173,6 +174,15 @@ public class ReservationService {
         return reservations.stream()
                 .map(this::map)
                 .toList();
+    }
+
+    public ReservationResponse NewReservationStatus(ReservationNewStatus reservationStatus) {
+         Reservation reservation = reservationRepository.findById(reservationStatus.reservationId())
+                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+         reservation.setStatus(reservationStatus.reservationStatus());
+
+         return this.map(reservationRepository.save(reservation));
     }
 
     public ReservationResponse updateReservation(ReservationUpdateDTO reservationUpdateDTO) {

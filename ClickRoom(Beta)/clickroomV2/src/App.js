@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import {useNavigate } from 'react-router-dom';
 import './App.css';
 import logo from './img/ClickRoom.png';
 import perfilImg from './img/perfil.jpg';
 import Carousel from './Carousel';
-import Resultados from './Resultados';
-import Hotel from './Hotel';
 
 function App() {
   const navigate = useNavigate();
+
 
   // Estados para pestañas/filtros
   const [pestanaActiva, setPestanaActiva] = useState(null);
@@ -30,6 +29,24 @@ function App() {
   const [resCheckIn, setResCheckIn] = useState('');
   const [resCheckOut, setResCheckOut] = useState('');
   const [resPromoCode, setResPromoCode] = useState('');
+  // Estado para sugerencias de ciudades
+    const [allCities, setAllCities] = useState([]);
+    const [citySuggestions, setCitySuggestions] = useState([]);
+    // Cargar todas las ciudades al montar
+    useEffect(() => {
+      fetch('/hotel/search/all?page=0&size=1000&sort=city')
+        .then(res => res.json())
+        .then(data => {
+          const list = Array.isArray(data.content)
+            ? data.content
+            : Array.isArray(data)
+              ? data
+              : [];
+          const cities = [...new Set(list.map(h => h.city))];
+          setAllCities(cities);
+        })
+        .catch(() => setAllCities([]));
+    }, []);
   // Cargar tipos de habitación al montar (manejar respuesta paginada)
   useEffect(() => {
     fetch('/room-type/search/all?page=0&size=10&sort=name')
@@ -131,7 +148,7 @@ const handleBuscar = () => {
       });
     } else {
       params = new URLSearchParams({
-        destino: destinoSeleccionado
+        destinoSeleccionado: destinoSeleccionado
       });
     }
 
@@ -261,12 +278,23 @@ const handleBuscar = () => {
         </div>
 
         {/* Barra de búsqueda */}
-        <div className="search-bar">
+        <div className="search-bar" style={{ position: 'relative' }}>
           <input
             type="text"
             placeholder="¿A dónde vas?"
             value={destinoSeleccionado}
-            onChange={e => setDestinoSeleccionado(e.target.value)}
+            onChange={e => {
+              const val = e.target.value;
+              setDestinoSeleccionado(val);
+              if (val.trim() !== '') {
+                const sug = allCities
+                  .filter(c => c && c.toLowerCase().includes(val.toLowerCase()))
+                  .slice(0, 5);
+                setCitySuggestions(sug);
+              } else {
+                setCitySuggestions([]);
+              }
+            }}
             onKeyDown={handleGlobalSearch}
           />
           <button
@@ -276,6 +304,37 @@ const handleBuscar = () => {
           >
             Hoteles
           </button>
+          {citySuggestions.length > 0 && (
+            <ul className="suggestions-list" style={{
+              listStyle: 'none',
+              margin: 0,
+              padding: '5px',
+              background: '#fff',
+              color: '#000',
+              position: 'absolute',
+              width: '200px',
+              zIndex: 2000,
+              top: '40px',
+              right: 0,
+              marginRight: '200px',
+              border: '1px solid #eee',
+              borderRadius: '4px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+            }}>
+              {citySuggestions.map((city, i) => (
+                <li
+                  key={i}
+                  style={{ padding: '5px', cursor: 'pointer' }}
+                  onClick={() => {
+                    setDestinoSeleccionado(city);
+                    setCitySuggestions([]);
+                  }}
+                >
+                  {city}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Iconos del header */}
@@ -351,8 +410,8 @@ const handleBuscar = () => {
                 marginBottom: 8,
                 padding: '8px',
                 borderRadius: '6px',
-                border: '1px solid #f9c300',
-                background: '#f9c300',
+                border: '1px solid #325daf',
+                background: '#325daf',
                 color: '#fff',
                 cursor: 'pointer'
               }}
@@ -368,9 +427,9 @@ const handleBuscar = () => {
                 width: '100%',
                 padding: '8px',
                 borderRadius: '6px',
-                border: '1px solid #f9c300',
+                border: '1px solid #325daf',
                 background: '#fff',
-                color: '#f9c300',
+                color: '#325daf',
                 cursor: 'pointer'
               }}
               onClick={() => {
@@ -422,8 +481,8 @@ const handleBuscar = () => {
             width: '100%',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
-            background: '#f9c300',
+            border: '1px solid #325daf',
+            background: '#325daf',
             color: '#fff',
             cursor: 'pointer'
           }}
@@ -439,7 +498,7 @@ const handleBuscar = () => {
             borderRadius: '6px',
             border: '1px solid #ccc',
             background: '#fff',
-            color: '#f9c300',
+            color: '#325daf',
             cursor: 'pointer'
           }}
           onClick={() => setMostrarLogin(false)}
@@ -449,6 +508,7 @@ const handleBuscar = () => {
       </form>
     ) : (
       <form onSubmit={handleRegistroSubmit}>
+        <div className='registro-form'>
         <h3 style={{ marginBottom: 16 }}>Registro</h3>
 
         <input
@@ -597,8 +657,8 @@ const handleBuscar = () => {
             width: '100%',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
-            background: '#f9c300',
+            border: '1px solid #325daf',
+            background: '#325daf',
             color: '#fff',
             cursor: 'pointer'
           }}
@@ -612,16 +672,18 @@ const handleBuscar = () => {
             marginTop: '8px',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #ccc',
+            border: '1px solid #325daf',
             background: '#fff',
-            color: '#f9c300',
+            color: '#325daf',
             cursor: 'pointer'
           }}
           onClick={() => setMostrarRegistro(false)}
         >
           Volver
         </button>
+        </div>
       </form>
+      
     )}
   </div>
 )}
@@ -642,8 +704,11 @@ const handleBuscar = () => {
       textAlign: 'center'
     }}
   >
+    
     {!usuario ? (
+      
       <>
+      <div className='resrvas_IS'>
         <p>No has iniciado sesión. Por favor, inicia sesión para ver tus reservas.</p>
         <button
           style={{
@@ -651,8 +716,8 @@ const handleBuscar = () => {
             marginBottom: '10px',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
-            background: '#f9c300',
+            border: '1px solid #325daf',
+            background: '#325daf',
             color: '#fff',
             cursor: 'pointer'
           }}
@@ -672,9 +737,9 @@ const handleBuscar = () => {
             width: '100%',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
+            border: '1px solid #325daf',
             background: '#fff',
-            color: '#f9c300',
+            color: '#325daf',
             cursor: 'pointer'
           }}
           onClick={() => {
@@ -685,7 +750,9 @@ const handleBuscar = () => {
         >
           Registrarse
         </button>
+        </div>
       </>
+      
     ) : (
       <>
         <h3>Mis Reservas</h3>
@@ -836,21 +903,31 @@ const handleBuscar = () => {
             </button>
 
             {pestanaActiva === 'destino' && (
-              <div className="popup-destinos">
+              <div
+                className="popup-destinos"
+                style={{
+                  position: 'absolute',
+                  top: '50px',
+                  left: 0,
+                  background: '#fff',
+                  borderRadius: '10px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  padding: '20px',
+                  zIndex: 2000,
+                  width: '240px',
+                  maxHeight: '300px',
+                  overflowY: 'auto'
+                }}
+              >
                 <h3 className="popup-titulo">Destinos Populares</h3>
-                <ul className="popup-lista">
-                  {[
-                    "Acapulco, Guerrero - México",
-                    "Cancún, Quintana Roo - México",
-                    "Cuernavaca, Morelos - México",
-                    "Puerto Vallarta, Jalisco - México",
-                    "Huatulco, Oaxaca - México"
-                  ].map((destino, i) => (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {allCities.map((city, idx) => (
                     <li
-                      key={i}
-                      className={`popup-item ${destinoSeleccionado === destino ? 'seleccionado' : ''}`}
+                      key={idx}
+                      className={`popup-item ${destinoSeleccionado === city ? 'seleccionado' : ''}`}
+                      style={{ padding: '8px', borderBottom: '1px solid #eee', cursor: 'pointer' }}
                       onClick={() => {
-                        setDestinoSeleccionado(destino);
+                        setDestinoSeleccionado(city);
                         setPestanaActiva(null);
                       }}
                     >
@@ -859,7 +936,7 @@ const handleBuscar = () => {
                         alt="ubicación"
                         className="icono-ubicacion"
                       />
-                      <span>{destino}</span>
+                      <span>{city}</span>
                     </li>
                   ))}
                 </ul>
@@ -952,15 +1029,13 @@ const handleBuscar = () => {
         <Carousel />
       </main>
 
-      <Routes>
-        <Route path="/" element={<></>} />
-        <Route path="/resultados" element={<Resultados />} />
-        <Route path="/hotel/:id" element={<Hotel />} />
-      </Routes>
 
       <footer style={{ background: '#00163a', color: '#fff', padding: '20px', textAlign: 'center', marginTop: '30px' }}>
+        <p><a href='/terycon'>Términos y Condiciones de Uso</a></p>
+        <p><a href='/avPriv'>Aviso de privacidad</a></p>
+        <p><a href='/avLeg'>Avisos legales</a></p>
         <p><b>©2025 ClickRoom. Todos los derechos reservados.</b></p>
-        <p>Desarrollado por Siminbikini</p>
+        <p>Desarrollado por <b>Siminbikini</b></p>
       </footer>
     </div>
   );

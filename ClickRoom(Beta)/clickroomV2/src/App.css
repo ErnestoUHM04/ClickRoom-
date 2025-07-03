@@ -12,6 +12,9 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
+a{
+  color:#fff;
+}
 
 .hotel-destacado{
   justify-content: space-between;
@@ -59,7 +62,7 @@
 .search-bar input {
   width: 250px;
   padding: 8px 35px 8px 15px;
-  border: 2px solid #f9c300;
+  border: 2px solid #325daf;
   border-radius: 30px;
   outline: none;
   background-color: transparent;
@@ -91,11 +94,11 @@
   cursor: pointer;
 }
 .header-icons button:last-child {
-  color: #f9c300; /* amarillo para el perfil */
+  color: #325daf; /* amarillo para el perfil */
 }
 
 .funcion-boton {
-  background-color: #f9c300;
+  background-color: #325daf;
   color: white;
   border: none;
   border-radius: 30px;
@@ -111,7 +114,7 @@
 }
 
 .funcion-boton:hover {
-  background-color: #e5b100;
+  background-color: #325daf;
 }
 
 /* Iconos dentro del botón */
@@ -174,7 +177,7 @@
 
 .campo-fecha {
   background-color: white;
-  border: 2px solid #f9c300;
+  border: 2px solid #325daf;
   border-radius: 15px;
   padding: 6px 10px;
   font-size: 16px;
@@ -191,7 +194,7 @@
 
 .campo-fecha:focus {
   outline: none;
-  border-color: #f9c300; /* amarillo en foco */
+  border-color: #325daf; /* amarillo en foco */
 }
 
 .campo-fecha::-webkit-calendar-picker-indicator {
@@ -248,21 +251,11 @@ hr {
   border-top: 2px solid #00163a;
   margin: 0 0 10px 0;
 }
-.hotel-card{
-  border: 2px solid #00163a;
-  border-radius: 15px;
-  padding: 20px;
-  width: 250px;
-  cursor: pointer;
-  background-color: #fff;
-  color: #00163a;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-}
+
 .boton{
   margin-top: 12px;
   padding: 10px 30px;
-  background-color: #f9c300;
+  background-color: #325daf;
   color: white;
   font-weight: bold;
   border: none;
@@ -275,7 +268,7 @@ hr {
 .boton-buscar-popup {
   margin-top: 12px;
   padding: 10px 30px;
-  background-color: #f9c300;
+  background-color: #325daf;
   color: white;
   font-weight: bold;
   border: none;
@@ -287,7 +280,327 @@ hr {
 }
 
 .boton-buscar-popup:hover {
-  background-color: #e5b100;
+  background-color: #325daf;
 }
+
+.lista-hoteles {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: 40px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.hotel-card {
+  background: transparent;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.hotel-card:hover {
+  background-color: rgba(0, 51, 102, 0.05);
+  transform: translateY(-3px);
+}
+
+.hotel-card h3 {
+  font-size: 1.4em;
+  color: #003366;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.hotel-card p {
+  margin: 4px 0;
+  font-size: 0.95em;
+  color: #444;
+  line-height: 1.5;
+}
+
+.hotel-card:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 51, 102, 0.3);
+  padding-bottom: 20px;
+}
+
+
+.hotel-card:hover {
+  transform: scale(1.05);
+}
+
+.H_desc {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #f9fbfd;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 51, 102, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.H_desc h1 {
+  text-align: center;
+  font-size: 2em;
+  color: #003366;
+  margin-bottom: 10px;
+}
+
+.H_desc p {
+  text-align: center;
+  font-size: 1em;
+  margin: 5px 0;
+  color: #555;
+}
+
+.H_desc h2 {
+  font-size: 1.4em;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  color: #003366;
+  border-bottom: 2px solid rgba(0, 51, 102, 0.2);
+  padding-bottom: 5px;
+}
+
+.H_desc ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 10px;
+}
+
+.H_desc li {
+  background: #fff;
+  border: 1px solid #e0e6ed;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.H_desc li strong {
+  color: #003366;
+}
+
+.H_desc ul ul {
+  margin-top: 5px;
+  padding-left: 20px;
+}
+
+.H_desc ul ul li {
+  background: transparent;
+  border: none;
+  padding: 3px 0;
+  margin: 0;
+  color: #555;
+}
+
+.reserva form {
+  max-width: 500px;
+  margin: 40px auto;
+  background: #f9fbfd;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 0 10px rgba(0, 51, 102, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.reserva h3 {
+  text-align: center;
+  color: #003366;
+  margin-bottom: 20px;
+  font-size: 1.6em;
+}
+
+.reserva label {
+  display: block;
+  margin: 15px 0 5px;
+  font-weight: 600;
+  color: #003366;
+}
+
+.reserva input[type="text"],
+.reserva input[type="number"],
+.reserva input[type="date"],
+.reserva select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccd6e0;
+  border-radius: 5px;
+  font-size: 1em;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.reserva input:focus,
+.reserva select:focus {
+  border-color: #003366;
+  outline: none;
+}
+
+.reserva .boton-buscar-popup {
+  background-color: #003366;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 10px;
+}
+
+.reserva .boton-buscar-popup:hover {
+  background-color: #00509e;
+}
+
+.reserva button[type="button"] {
+  background-color: #ccc;
+  color: #333;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.reserva button[type="button"]:hover {
+  background-color: #999;
+}
+
+.reserva pre {
+  background: #f0f4f8;
+  padding: 15px;
+  border-radius: 5px;
+  overflow-x: auto;
+  color: #333;
+  font-size: 0.9em;
+}
+
+.resrvas_IS {
+  max-width: 400px;
+  margin: 40px auto;
+  background: #f9fbfd;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 0 10px rgba(0, 51, 102, 0.1);
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.resrvas_IS p {
+  margin: 15px 0;
+  font-size: 1em;
+  color: #555;
+}
+
+.resrvas_IS p.small-text {
+  font-size: 0.9em;
+  color: #777;
+}
+
+.resrvas_IS button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 600;
+  border: 2px solid #325daf;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.resrvas_IS button.login-btn {
+  background-color: #325daf;
+  color: #003366;
+}
+
+.resrvas_IS button.login-btn:hover {
+  background-color: #325daf;
+}
+
+.resrvas_IS button.register-btn {
+  background-color: #fff;
+  color: #325daf;
+}
+
+.resrvas_IS button.register-btn:hover {
+  background-color: #325daf;
+  color: #fff;
+}
+
+.registro-form {
+  max-width: 500px;
+  margin: 40px auto;
+  background: #f9fbfd;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 0 10px rgba(0, 51, 102, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+}
+
+.registro-form h3 {
+  color: #003366;
+  margin-bottom: 20px;
+  font-size: 1.6em;
+}
+
+.registro-form input[type="text"],
+.registro-form input[type="email"],
+.registro-form input[type="tel"],
+.registro-form input[type="date"],
+.registro-form input[type="password_hash"],
+.registro-form input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccd6e0;
+  font-size: 1em;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.registro-form input:focus {
+  border-color: #325daf;
+  outline: none;
+}
+
+.registro-form button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.registro-form button[type="submit"] {
+  background-color: #325daf;
+  color: #fff;
+  border: 1px solid #325daf;
+}
+
+.registro-form button[type="submit"]:hover {
+  background-color: #234199;
+}
+
+.registro-form button[type="button"] {
+  background-color: #fff;
+  color: #325daf;
+  border: 1px solid #325daf;
+}
+
+.registro-form button[type="button"]:hover {
+  background-color: #325daf;
+  color: #fff;
+}
+
 
 

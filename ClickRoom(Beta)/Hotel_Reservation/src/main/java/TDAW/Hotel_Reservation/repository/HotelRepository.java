@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface HotelRepository extends JpaRepository<Hotel, Long> {
     Page<Hotel> findAll(Pageable pageable);
     Hotel findByName(String name);
+    Hotel findByCity(String city);
 }

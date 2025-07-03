@@ -42,8 +42,8 @@ public class HotelController {
     }
 
     @GetMapping("/search")
-    private ResponseEntity<HotelResponse> FindAllByName(@RequestParam String name){
-        Hotel hotel = hotelService.findByName(name);
+    private ResponseEntity<HotelResponse> FindAllByName(@RequestParam String destino){
+        Hotel hotel = hotelService.findByCity(destino);
         return ResponseEntity.ok(hotelService.map(hotel));
     }
 

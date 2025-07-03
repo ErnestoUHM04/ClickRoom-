@@ -6,8 +6,7 @@ import perfilImg from './img/perfil.jpg';
 
 function Resultados() {
   const [hoteles, setHoteles] = useState([]);
-
-  const [destino, setDestino] = useState('');
+  const [destinoSeleccionado, setDestinoSeleccionado] = useState('');
   const [llegada, setLlegada] = useState('');
   const [salida, setSalida] = useState('');
   const [adultos, setAdultos] = useState(0);
@@ -35,6 +34,24 @@ function Resultados() {
     const [resCheckIn, setResCheckIn] = useState('');
     const [resCheckOut, setResCheckOut] = useState('');
     const [resPromoCode, setResPromoCode] = useState('');
+    // Estado para sugerencias de ciudades
+      const [allCities, setAllCities] = useState([]);
+      const [citySuggestions, setCitySuggestions] = useState([]);
+      // Cargar todas las ciudades al montar
+      useEffect(() => {
+        fetch('/hotel/search/all?page=0&size=1000&sort=city')
+          .then(res => res.json())
+          .then(data => {
+            const list = Array.isArray(data.content)
+              ? data.content
+              : Array.isArray(data)
+                ? data
+                : [];
+            const cities = [...new Set(list.map(h => h.city))];
+            setAllCities(cities);
+          })
+          .catch(() => setAllCities([]));
+      }, []);
 
   // Persistencia de usuario en localStorage
   useEffect(() => {
@@ -57,14 +74,14 @@ function Resultados() {
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const todos = query.get('todos');
-    const destinoQuery = query.get('destino') || '';
+    const destinoQuery = query.get('destinoSeleccionado') || '';
     const llegadaQuery = query.get('llegada') || '';
     const salidaQuery = query.get('salida') || '';
     const adultosQuery = parseInt(query.get('adultos')) || 0;
     const ninosQuery = parseInt(query.get('ninos')) || 0;
     const habitacionesQuery = parseInt(query.get('habitaciones')) || 0;
 
-    setDestino(destinoQuery);
+    setDestinoSeleccionado(destinoQuery);
     setLlegada(llegadaQuery);
     setSalida(salidaQuery);
     setAdultos(adultosQuery);
@@ -75,7 +92,7 @@ function Resultados() {
     if (todos === 'true') {
       url = "/hotel/search/all?page=0&size=10&sort=name";
     } else {
-      url = `/hotel/search?destino=${encodeURIComponent(destinoQuery)}&habitaciones=${habitacionesQuery}`;
+      url = `/hotel/search?destino=${encodeURIComponent(destinoQuery)}`;
     }
 
     fetch(url)
@@ -87,7 +104,7 @@ function Resultados() {
           ? data
           : Array.isArray(data.content)
             ? data.content
-            : [];
+            : [data];
         setHoteles(lista);
       })
       .catch(err => console.error('Error al cargar hoteles', err));
@@ -126,7 +143,7 @@ function Resultados() {
 
   const handleBuscar = () => {
     const params = new URLSearchParams({
-      destino,
+      destinoSeleccionado,
       llegada,
       salida,
       adultos,
@@ -145,14 +162,14 @@ function Resultados() {
     if (e.key && e.key !== 'Enter') return;
 
     let params;
-    if (!destino || destino.trim() === '') {
+    if (!destinoSeleccionado || destinoSeleccionado.trim() === '') {
       // Si el campo está vacío, buscar todos los hoteles
       params = new URLSearchParams({
         todos: true
       });
     } else {
       params = new URLSearchParams({
-        destino
+        destinoSeleccionado
       });
     }
 
@@ -277,12 +294,23 @@ function Resultados() {
         </div>
 
         {/* Barra de búsqueda */}
-        <div className="search-bar">
+        <div className="search-bar" style={{ position: 'relative' }}>
           <input
             type="text"
             placeholder="¿A dónde vas?"
-            value={destino}
-            onChange={e => setDestino(e.target.value)}
+            value={destinoSeleccionado}
+            onChange={e => {
+              const val = e.target.value;
+              setDestinoSeleccionado(val);
+              if (val.trim() !== '') {
+                const sug = allCities
+                  .filter(c => c && c.toLowerCase().includes(val.toLowerCase()))
+                  .slice(0, 5);
+                setCitySuggestions(sug);
+              } else {
+                setCitySuggestions([]);
+              }
+            }}
             onKeyDown={handleGlobalSearch}
           />
           <button
@@ -292,6 +320,37 @@ function Resultados() {
           >
             Hoteles
           </button>
+          {citySuggestions.length > 0 && (
+            <ul className="suggestions-list" style={{
+              listStyle: 'none',
+              margin: 0,
+              padding: '5px',
+              background: '#fff',
+              color: '#000',
+              position: 'absolute',
+              width: '200px',
+              zIndex: 2000,
+              top: '40px',
+              right: 0,
+              marginRight: '200px',
+              border: '1px solid #eee',
+              borderRadius: '4px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+            }}>
+              {citySuggestions.map((city, i) => (
+                <li
+                  key={i}
+                  style={{ padding: '5px', cursor: 'pointer' }}
+                  onClick={() => {
+                    setDestinoSeleccionado(city);
+                    setCitySuggestions([]);
+                  }}
+                >
+                  {city}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="header-icons">
@@ -366,8 +425,8 @@ function Resultados() {
                 marginBottom: 8,
                 padding: '8px',
                 borderRadius: '6px',
-                border: '1px solid #f9c300',
-                background: '#f9c300',
+                border: '1px solid #325daf',
+                background: '#325daf',
                 color: '#fff',
                 cursor: 'pointer'
               }}
@@ -383,9 +442,9 @@ function Resultados() {
                 width: '100%',
                 padding: '8px',
                 borderRadius: '6px',
-                border: '1px solid #f9c300',
+                border: '1px solid #325daf',
                 background: '#fff',
-                color: '#f9c300',
+                color: '#325daf',
                 cursor: 'pointer'
               }}
               onClick={() => {
@@ -437,8 +496,8 @@ function Resultados() {
             width: '100%',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
-            background: '#f9c300',
+            border: '1px solid #325daf',
+            background: '#325daf',
             color: '#fff',
             cursor: 'pointer'
           }}
@@ -454,7 +513,7 @@ function Resultados() {
             borderRadius: '6px',
             border: '1px solid #ccc',
             background: '#fff',
-            color: '#f9c300',
+            color: '#325daf',
             cursor: 'pointer'
           }}
           onClick={() => setMostrarLogin(false)}
@@ -464,6 +523,7 @@ function Resultados() {
       </form>
     ) : (
       <form onSubmit={handleRegistroSubmit}>
+        <div className='registro-form'>
         <h3 style={{ marginBottom: 16 }}>Registro</h3>
 
         <input
@@ -612,8 +672,8 @@ function Resultados() {
             width: '100%',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
-            background: '#f9c300',
+            border: '1px solid #325daf',
+            background: '#325daf',
             color: '#fff',
             cursor: 'pointer'
           }}
@@ -627,15 +687,16 @@ function Resultados() {
             marginTop: '8px',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #ccc',
+            border: '1px solid #325daf',
             background: '#fff',
-            color: '#f9c300',
+            color: '#325daf',
             cursor: 'pointer'
           }}
           onClick={() => setMostrarRegistro(false)}
         >
           Volver
         </button>
+        </div>
       </form>
     )}
   </div>
@@ -659,6 +720,7 @@ function Resultados() {
   >
     {!usuario ? (
       <>
+      <div className='resrvas_IS'>
         <p>No has iniciado sesión. Por favor, inicia sesión para ver tus reservas.</p>
         <button
           style={{
@@ -666,8 +728,8 @@ function Resultados() {
             marginBottom: '10px',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
-            background: '#f9c300',
+            border: '1px solid #325daf',
+            background: '#325daf',
             color: '#fff',
             cursor: 'pointer'
           }}
@@ -687,9 +749,9 @@ function Resultados() {
             width: '100%',
             padding: '8px',
             borderRadius: '6px',
-            border: '1px solid #f9c300',
+            border: '1px solid #325daf',
             background: '#fff',
-            color: '#f9c300',
+            color: '#325daf',
             cursor: 'pointer'
           }}
           onClick={() => {
@@ -700,6 +762,7 @@ function Resultados() {
         >
           Registrarse
         </button>
+        </div>
       </>
     ) : (
       <>
@@ -840,28 +903,38 @@ function Resultados() {
           <div style={{ position: 'relative' }}>
             <button
               className="funcion-boton"
-              onClick={() => setPestanaActiva(pestanaActiva === 'destino' ? null : 'destino')}
+              onClick={() => setPestanaActiva(pestanaActiva === 'destinoSeleccionado' ? null : 'destinoSeleccionado')}
             >
               <img src="https://img.icons8.com/ios-filled/50/ffffff/airport.png" alt="avión" />
-              ¿A dónde vas? {destino && `→ ${destino}`}
+              ¿A dónde vas? {destinoSeleccionado && `→ ${destinoSeleccionado}`}
             </button>
 
-            {pestanaActiva === 'destino' && (
-              <div className="popup-destinos">
+            {pestanaActiva === 'destinoSeleccionado' && (
+              <div
+                className="popup-destinos"
+                style={{
+                  position: 'absolute',
+                  top: '50px',
+                  left: 0,
+                  background: '#fff',
+                  borderRadius: '10px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  padding: '20px',
+                  zIndex: 2000,
+                  width: '240px',
+                  maxHeight: '300px',
+                  overflowY: 'auto'
+                }}
+              >
                 <h3 className="popup-titulo">Destinos Populares</h3>
-                <ul className="popup-lista">
-                  {[
-                    "Acapulco, Guerrero - México",
-                    "Cancún, Quintana Roo - México",
-                    "Cuernavaca, Morelos - México",
-                    "Puerto Vallarta, Jalisco - México",
-                    "Huatulco, Oaxaca - México"
-                  ].map((dest, i) => (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {allCities.map((city, idx) => (
                     <li
-                      key={i}
-                      className={`popup-item ${destino === dest ? 'seleccionado' : ''}`}
+                      key={idx}
+                      className={`popup-item ${destinoSeleccionado === city ? 'seleccionado' : ''}`}
+                      style={{ padding: '8px', borderBottom: '1px solid #eee', cursor: 'pointer' }}
                       onClick={() => {
-                        setDestino(dest);
+                        setDestinoSeleccionado(city);
                         setPestanaActiva(null);
                       }}
                     >
@@ -870,7 +943,7 @@ function Resultados() {
                         alt="ubicación"
                         className="icono-ubicacion"
                       />
-                      <span>{dest}</span>
+                      <span>{city}</span>
                     </li>
                   ))}
                 </ul>
@@ -957,7 +1030,7 @@ function Resultados() {
           </div>
         </div>
 
-        <h2 style={{ textAlign: 'center' }}>Resultados para: {destino}</h2>
+        <h2 style={{ textAlign: 'center' }}>Resultados para: {destinoSeleccionado}</h2>
 
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <p>
@@ -968,33 +1041,35 @@ function Resultados() {
           </p>
         </div>
 
-        <div className="lista-hoteles" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
-          {hoteles.length === 0 ? (
-            <p style={{ textAlign: 'center' }}>No se encontraron hoteles para tu búsqueda.</p>
-          ) : (
-            hoteles.map(hotel => (
-              <div
-                key={hotel.id}
-                className="hotel-card"
-                onClick={() => irAHotel(hotel.id)}
-                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                <h3>{hotel.name}</h3>
-                <p>Estrellas: {hotel.stars || 'N/A'}</p>
-                <p>Ciudad: {hotel.city}, {hotel.country}</p>
-                <p>Descripción: {hotel.description}</p>
-                <p>Teléfono: {hotel.phone}</p>
-                <p>Email: {hotel.email}</p>
-              </div>
-            ))
-          )}
-        </div>
+        <div className="lista-hoteles">
+  {hoteles.length === 0 ? (
+    <p style={{ textAlign: 'center' }}>No se encontraron hoteles para tu búsqueda.</p>
+  ) : (
+    hoteles.map(hotel => (
+      <div
+        key={hotel.id}
+        className="hotel-card"
+        onClick={() => irAHotel(hotel.id)}
+      >
+        <h3>{hotel.name}</h3>
+        <p>Estrellas: {hotel.stars || 'N/A'}</p>
+        <p>Ciudad: {hotel.city}, {hotel.country}</p>
+        <p>Descripción: {hotel.description}</p>
+        <p>Teléfono: {hotel.phone}</p>
+        <p>Email: {hotel.email}</p>
+      </div>
+    ))
+  )}
+</div>
+
       </main>
 
       <footer style={{ background: '#00163a', color: '#fff', padding: '20px', textAlign: 'center', marginTop: '30px' }}>
+        <p><a href='/terycon'>Términos y Condiciones de Uso</a></p>
+        <p><a href='/avPriv'>Aviso de privacidad</a></p>
+        <p><a href='/avLeg'>Avisos legales</a></p>
         <p><b>©2025 ClickRoom. Todos los derechos reservados.</b></p>
-        <p>Desarrollado por Siminbikini</p>
+        <p>Desarrollado por <b>Siminbikini</b></p>
       </footer>
     </div>
   );

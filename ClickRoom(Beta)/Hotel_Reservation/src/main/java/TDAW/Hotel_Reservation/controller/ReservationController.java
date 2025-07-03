@@ -2,9 +2,11 @@ package TDAW.Hotel_Reservation.controller;
 
 import TDAW.Hotel_Reservation.dto.promotion.PromotionDTO;
 import TDAW.Hotel_Reservation.dto.reservation.ReservationDTO;
+import TDAW.Hotel_Reservation.dto.reservation.ReservationNewStatus;
 import TDAW.Hotel_Reservation.dto.reservation.ReservationResponse;
 import TDAW.Hotel_Reservation.dto.reservation.ReservationUpdateDTO;
 import TDAW.Hotel_Reservation.entity.promotion.Promotion;
+import TDAW.Hotel_Reservation.entity.reservation.ReservationStatus;
 import TDAW.Hotel_Reservation.service.clases.ReservationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,13 @@ public class ReservationController {
     private ResponseEntity<ReservationResponse> Update(@RequestBody ReservationUpdateDTO reservationUpdateDTO){
         return ResponseEntity.ok(reservationService.updateReservation(reservationUpdateDTO));
     }
+
+    @PutMapping("/update/status")
+    private ResponseEntity<ReservationResponse> UpdateStatus(@RequestBody @Valid ReservationNewStatus reservationStatus){
+        return ResponseEntity.ok(reservationService.NewReservationStatus(reservationStatus));
+    }
+
+
 
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
