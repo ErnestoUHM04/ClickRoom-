@@ -27,6 +27,14 @@ function TerYCon() {
   const [resCheckIn, setResCheckIn] = useState('');
   const [resCheckOut, setResCheckOut] = useState('');
   const [resPromoCode, setResPromoCode] = useState('');
+  // Estado para abrir/cerrar el popup de pago
+  const [popupPagoAbierto, setPopupPagoAbierto] = useState(false);
+  // Estado para los datos del formulario de pago
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [cardHolder, setCardHolder] = useState('');
+  const [cardType, setCardType] = useState('');
+  const [cvv, setCvv] = useState('');
   // Cargar tipos de habitación al montar (manejar respuesta paginada)
   useEffect(() => {
     fetch('/room-type/search/all?page=0&size=10&sort=name')
@@ -53,11 +61,7 @@ function TerYCon() {
 
   // Estados para filtros
   const [destinoSeleccionado, setDestinoSeleccionado] = useState('');
-  const [llegada, setLlegada] = useState('');
-  const [salida, setSalida] = useState('');
-  const [adultos, setAdultos] = useState(2);
-  const [ninos, setNinos] = useState(0);
-  const [habitaciones, setHabitaciones] = useState(1);
+
   // Estado para sugerencias de ciudades
   const [allCities, setAllCities] = useState([]);
   const [citySuggestions, setCitySuggestions] = useState([]);
@@ -112,29 +116,13 @@ function TerYCon() {
         });
     }
   }, [popupReservasAbierto, usuario]);
-
-const handleBuscar = () => {
-  if (!destinoSeleccionado) {
-    alert("Por favor selecciona un destino.");
-    return;
+useEffect(() => {
+  if (usuario) {
+    if (usuario.userRole === 'SUPER') {
+      navigate('/admin');
+    }
   }
-  if (llegada && salida && new Date(salida) <= new Date(llegada)) {
-    alert("La fecha de salida debe ser posterior a la de llegada.");
-    return;
-  }
-  const params = new URLSearchParams({
-    destino: destinoSeleccionado,
-    llegada,
-    salida,
-    adultos,
-    ninos,
-    habitaciones
-  });
-  navigate(`/resultados?${params.toString()}`);
-
-  // Cerrar todas las pestañas emergentes
-  setPestanaActiva(null);
-};
+}, [usuario, navigate]);
   const handleGlobalSearch = (e) => {
     if (e.key && e.key !== 'Enter') return;
 
@@ -182,6 +170,7 @@ const handleBuscar = () => {
         console.log("Usuario logueado:", data);
         setUsuario(data);
         localStorage.setItem("usuario", JSON.stringify(data));
+      alert("Datos correctos, bienvenid@ " + data.firstName);
         setPerfilAbierto(false);
         setMostrarLogin(false);
         // Traer reservas
@@ -264,7 +253,45 @@ const handleBuscar = () => {
         alert(err.message);
       });
   };
+  // —–– Función de formateo de número de tarjeta —––
+  function formatCardNumber(e) {
+    let v = e.target.value.replace(/\D/g,'').slice(0,16);
+    v = v.match(/.{1,4}/g)?.join('-') || v;
+    setCardNumber(v);
+  }
 
+  // —–– Función de formateo de expiry —––
+  function formatExpiry(e) {
+    let v = e.target.value.replace(/\D/g,'').slice(0,4);
+    if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+    setExpiry(v);
+  }
+
+  // —–– Manejo de envío del pago —––
+  const handlePagoSubmit = e => {
+    e.preventDefault();
+    fetch('/reservation/update/status', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reservationId: popupPagoAbierto,
+        reservationStatus: 'PAGADA'
+      })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Error al procesar pago');
+      return res.json();
+    })
+    .then(() => {
+      alert('Pago exitoso');
+      setPopupPagoAbierto(null);
+      // refresca tu lista si es necesario
+    })
+    .catch(err => {
+      console.error(err);
+      alert('No se pudo procesar el pago.');
+    });
+  };
   return (
     <div className="App">
       <header className="App-header">
@@ -780,24 +807,35 @@ const handleBuscar = () => {
                 >
                   Cancelar reservación
                 </button>
-                <button
-                  className='boton'
-                  style={{ marginLeft: '8px' }}
-                  onClick={() => {
-                    // Open edit form for this reservation
-                    setEditingReservation(r);
-                    // Prefill form fields
-                    const matchedType = roomTypes.find(rt => rt.name === r.roomType);
-                    setResRoomTypeId(matchedType ? matchedType.id.toString() : '');
-                    setResRoomsCount(r.number);
-                    setResCheckIn(r.checkIn);
-                    setResCheckOut(r.checkOut);
-                    setResPromoCode(r.newDiscountCode || '');
-                    setPopupEditForm(true);
-                  }}
-                >
-                  Modificar reservación
-                </button>
+                {r.reservationStatus === 'PENDIENTE' && (
+                  <>
+                    <button
+                      className='boton'
+                      style={{ marginLeft: '8px' }}
+                      onClick={() => {
+                        // Open edit form for this reservation
+                        setEditingReservation(r);
+                        // Prefill form fields
+                        const matchedType = roomTypes.find(rt => rt.name === r.roomType);
+                        setResRoomTypeId(matchedType ? matchedType.id.toString() : '');
+                        setResRoomsCount(r.number);
+                        setResCheckIn(r.checkIn);
+                        setResCheckOut(r.checkOut);
+                        setResPromoCode(r.newDiscountCode || '');
+                        setPopupEditForm(true);
+                      }}
+                    >
+                      Modificar reservación
+                    </button>
+                    <button
+                      className="boton"
+                      style={{ marginLeft: '8px' }}
+                      onClick={() => setPopupPagoAbierto(r.reservationId)}
+                    >
+                      Pagar reservación
+                    </button>
+                  </>
+                )}
               </li>
             ))}
           </ul>
@@ -876,6 +914,79 @@ const handleBuscar = () => {
           </form>
         </div>
       )}
+
+{/* Popup de pago de reservación */}
+      {popupPagoAbierto && (
+  <div className="pestana-emergente">
+    <h3>Pago de reservación #{popupPagoAbierto}</h3>
+    <form onSubmit={handlePagoSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* 1. Número de tarjeta */}
+      <label>Número de la tarjeta</label>
+      <input
+        type="text"
+        value={cardNumber}
+        onChange={formatCardNumber}  // función que da forma 1234-5678-...
+        maxLength={19}
+        required
+      />
+      {/* 2. Fecha de caducidad */}
+      <label>Fecha de caducidad</label>
+      <input
+        type="text"
+        placeholder="MM/AA"
+        value={expiry}
+        onChange={formatExpiry}      // función que inserta la “/”
+        maxLength={5}
+        required
+      />
+      {/* 3. Titular */}
+      <label>Titular de la tarjeta</label>
+      <input
+        type="text"
+        value={cardHolder}
+        onChange={e => setCardHolder(e.target.value)}
+        required
+      />
+      {/* 4. Tipo */}
+      <label>Tipo de tarjeta</label>
+      <select
+        value={cardType}
+        onChange={e => setCardType(e.target.value)}
+        required
+      >
+        <option value="">Seleccione</option>
+        <option>Visa</option>
+        <option>MasterCard</option>
+        <option>American Express</option>
+      </select>
+      {/* 5. CVV */}
+      <label>CVV</label>
+      <input
+        type="password"
+        value={cvv}
+        onChange={e => {
+          const v = e.target.value.replace(/\D/g,'').slice(0,3);
+          setCvv(v);
+        }}
+        maxLength={3}
+        required
+      />
+
+      <div style={{ marginTop: 20 }}>
+        <button type="submit" className="boton-buscar-popup">
+          Pagar
+        </button>
+        <button
+          type="button"
+          className="boton"
+          onClick={() => setPopupPagoAbierto(null)}
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+)}
       </header>
 
       <main style={{ paddingTop: "60px" }}>

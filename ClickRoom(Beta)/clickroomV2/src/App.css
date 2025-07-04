@@ -531,6 +531,19 @@ hr {
   background-color: #325daf;
   color: #fff;
 }
+.pestana-emergente{
+      position: absolute;
+      top: 50px;
+      right: 50px;
+      background: #fff;
+      color: #222;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 51, 102, 0.1);
+      padding: 20px;
+      z-index: 2000;
+      min-width: 260px;
+      text-align: center;
+}
 
 .registro-form {
   max-width: 500px;

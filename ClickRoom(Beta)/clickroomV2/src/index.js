@@ -9,6 +9,7 @@ import Hotel from './Hotel';
 import TerYCon from './TerYCon';
 import AvPriv from './AvPriv';
 import AvLeg from './AvLeg';
+import Admin from './Admin';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -21,6 +22,7 @@ root.render(
         <Route path="/terycon" element={<TerYCon />} />
         <Route path="/avPriv" element={<AvPriv />} />
         <Route path="/avLeg" element={<AvLeg />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

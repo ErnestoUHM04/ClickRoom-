@@ -167,6 +167,14 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationResponse> getReservationsByStatus(ReservationStatus reservationStatus) {
+        List<Reservation> reservations = reservationRepository.findAllByStatus(reservationStatus);
+
+        return reservations.stream()
+                .map(this::map)
+                .toList();
+    }
+
     public List<ReservationResponse> getReservationsByDate(LocalDate date) {
         List<Reservation> reservations = reservationRepository
                 .findByCheckInLessThanEqualAndCheckOutGreaterThanEqual(date, date);

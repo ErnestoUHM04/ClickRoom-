@@ -11,5 +11,6 @@ public record UserLogin(
         @NotBlank(message = "La contraseña no puede estar vacía")
         @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
         String password,
-        String firstName
+        String firstName,
+        UserRole userRole
 ) {}

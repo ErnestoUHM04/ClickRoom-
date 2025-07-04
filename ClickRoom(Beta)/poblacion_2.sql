@@ -1,5 +1,5 @@
 
--- HOTELS (5 nuevos)
+-- HOTELS (5 nuevos) del 4 al 8
 INSERT INTO hotel (hotel_id, name, email, phone, address, city, country, postal_code, description, stars, check_in_time, check_out_time)
 VALUES 
 (4, 'Hotel Costa Serena', 'info@costaserena.com', '555-2345', 'Av. Marina 45', 'Puerto Azul', 'México', '24680', 'Vistas al mar y brisa constante.', 4, '15:00:00', '12:00:00'),
@@ -88,3 +88,6 @@ INSERT INTO promotion (promotion_id, code, discount_percent, start_date, end_dat
 (14, 'RIOSER20',   20.00, '2025-07-15', '2025-09-15',  60, 11),
 (15, 'COLONIAL5',   5.00, '2025-10-01', '2025-12-15', 120, 12),
 (16, 'MARQUES25',  25.00, '2025-11-01', '2026-01-31',  50, 13);
+
+INSERT INTO user (role, user_id, blocked, email, first_name, last_name, password_hash, phone, birthdate, nationality, passport_number) VALUES
+('ADMIN', 2, 0, 'admin@gmail.com', 'Admin', 'User', 'password', '555-0001', '1990-01-01', 'Mexican', 'P12345678');

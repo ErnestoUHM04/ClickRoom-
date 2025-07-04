@@ -68,7 +68,8 @@ public class UserService {
                     user.getUserId(),
                     user.getEmail(),
                     null,
-                    user.getFirstName()
+                    user.getFirstName(),
+                    user.getRole()
             );
         }else{
             throw new RuntimeException("Password incorrect");

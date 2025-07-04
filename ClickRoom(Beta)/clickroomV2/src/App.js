@@ -9,8 +9,6 @@ function App() {
   const navigate = useNavigate();
 
 
-  // Estados para pestañas/filtros
-  const [pestanaActiva, setPestanaActiva] = useState(null);
 
   // Estados para login y registro
   const [perfilAbierto, setPerfilAbierto] = useState(false);
@@ -29,6 +27,14 @@ function App() {
   const [resCheckIn, setResCheckIn] = useState('');
   const [resCheckOut, setResCheckOut] = useState('');
   const [resPromoCode, setResPromoCode] = useState('');
+  // Estado para abrir/cerrar el popup de pago
+  const [popupPagoAbierto, setPopupPagoAbierto] = useState(false);
+  // Estado para los datos del formulario de pago
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [cardHolder, setCardHolder] = useState('');
+  const [cardType, setCardType] = useState('');
+  const [cvv, setCvv] = useState('');
   // Estado para sugerencias de ciudades
     const [allCities, setAllCities] = useState([]);
     const [citySuggestions, setCitySuggestions] = useState([]);
@@ -71,13 +77,8 @@ function App() {
     confirmPassword: ''
   });
 
-  // Estados para filtros
+  // Estado para filtro de destino
   const [destinoSeleccionado, setDestinoSeleccionado] = useState('');
-  const [llegada, setLlegada] = useState('');
-  const [salida, setSalida] = useState('');
-  const [adultos, setAdultos] = useState(2);
-  const [ninos, setNinos] = useState(0);
-  const [habitaciones, setHabitaciones] = useState(1);
   useEffect(() => {
     const savedUser = localStorage.getItem("usuario");
     if (savedUser) {
@@ -114,32 +115,10 @@ function App() {
         });
     }
   }, [popupReservasAbierto, usuario]);
-
-const handleBuscar = () => {
-  if (!destinoSeleccionado) {
-    alert("Por favor selecciona un destino.");
-    return;
-  }
-  if (llegada && salida && new Date(salida) <= new Date(llegada)) {
-    alert("La fecha de salida debe ser posterior a la de llegada.");
-    return;
-  }
-  const params = new URLSearchParams({
-    destino: destinoSeleccionado,
-    llegada,
-    salida,
-    adultos,
-    ninos,
-    habitaciones
-  });
-  navigate(`/resultados?${params.toString()}`);
-
-  // Cerrar todas las pestañas emergentes
-  setPestanaActiva(null);
-};
+  
   const handleGlobalSearch = (e) => {
     if (e.key && e.key !== 'Enter') return;
-
+    
     let params;
     if (!destinoSeleccionado || destinoSeleccionado.trim() === '') {
       // Buscar todos los hoteles
@@ -151,12 +130,8 @@ const handleBuscar = () => {
         destinoSeleccionado: destinoSeleccionado
       });
     }
-
+    
     navigate(`/resultados?${params.toString()}`);
-
-    if (setPestanaActiva) {
-      setPestanaActiva(null);
-    }
   };
   const handleLoginChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -174,31 +149,32 @@ const handleBuscar = () => {
         password: loginData.password,
       }),
     })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Login incorrecto");
-        }
-        return res.json();
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Login incorrecto");
+      }
+      return res.json();
+    })
+    .then((data) => {
+      console.log("Usuario logueado:", data);
+      setUsuario(data);
+      localStorage.setItem("usuario", JSON.stringify(data));
+      alert("Datos correctos, bienvenid@ " + data.firstName);
+      setPerfilAbierto(false);
+      setMostrarLogin(false);
+      // Traer reservas
+      fetch(`/reservas?userId=${data.userId}`)
+      .then((res) => res.json())
+      .then((reservas) => {
+        console.log("Reservas del usuario:", reservas);
+        setReservas(reservas);
       })
-      .then((data) => {
-        console.log("Usuario logueado:", data);
-        setUsuario(data);
-        localStorage.setItem("usuario", JSON.stringify(data));
-        setPerfilAbierto(false);
-        setMostrarLogin(false);
-        // Traer reservas
-        fetch(`/reservas?userId=${data.userId}`)
-          .then((res) => res.json())
-          .then((reservas) => {
-            console.log("Reservas del usuario:", reservas);
-            setReservas(reservas);
-          })
-          .catch((err) => console.error(err));
-      })
-      .catch((err) => {
-        console.error(err);
-        alert("Login incorrecto");
-      });
+      .catch((err) => console.error(err));
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("Login incorrecto");
+    });
   };
   
   const handleLogout = () => {
@@ -212,61 +188,107 @@ const handleBuscar = () => {
   };
   const handleRegistroSubmit = (e) => {
     e.preventDefault();
-
+    
     if (registroData.password_hash !== registroData.confirmPassword) {
       alert("Las contraseñas no coinciden.");
       return;
     }
-
+    
     fetch("/users/guest/create", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email: registroData.email,
-      passwordHash: registroData.password_hash,
-      firstName: registroData.first_name,
-      lastName: registroData.last_name,
-      phone: registroData.phone,
-      passportNumber: registroData.passport_number,
-      nationality: registroData.nationality,
-      birthdate: registroData.birthdate
-    }),
-  })
-      .then((res) => {
-        console.log("Status:", res.status);
-        return res.json().then(data => {
-          console.log("Response data:", data);
-          if (!res.ok) {
-            throw new Error(data.message || "Error en registro");
-          }
-          return data;
-        });
-      })
-      .then((data) => {
-        console.log("Usuario registrado:", data);
-        setUsuario(data);
-        setPerfilAbierto(false);
-        setMostrarRegistro(false);
-        setRegistroData({
-          first_name: '',
-          last_name: '',
-          email: '',
-          phone: '',
-          birthdate: '',
-          nationality: '',
-          passport_number: '',
-          password_hash: '',
-          confirmPassword: ''
-        });
-      })
-      .catch((err) => {
-        console.error(err);
-        alert(err.message);
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: registroData.email,
+        passwordHash: registroData.password_hash,
+        firstName: registroData.first_name,
+        lastName: registroData.last_name,
+        phone: registroData.phone,
+        passportNumber: registroData.passport_number,
+        nationality: registroData.nationality,
+        birthdate: registroData.birthdate
+      }),
+    })
+    .then((res) => {
+      console.log("Status:", res.status);
+      return res.json().then(data => {
+        console.log("Response data:", data);
+        if (!res.ok) {
+          throw new Error(data.message || "Error en registro");
+        }
+        return data;
       });
+    })
+    .then((data) => {
+      console.log("Usuario registrado:", data);
+      setUsuario(data);
+      setPerfilAbierto(false);
+      setMostrarRegistro(false);
+      setRegistroData({
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone: '',
+        birthdate: '',
+        nationality: '',
+        passport_number: '',
+        password_hash: '',
+        confirmPassword: ''
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      alert(err.message);
+    });
   };
-
+  // —–– Función de formateo de número de tarjeta —––
+  function formatCardNumber(e) {
+    let v = e.target.value.replace(/\D/g,'').slice(0,16);
+    v = v.match(/.{1,4}/g)?.join('-') || v;
+    setCardNumber(v);
+  }
+  
+  // —–– Función de formateo de expiry —––
+  function formatExpiry(e) {
+    let v = e.target.value.replace(/\D/g,'').slice(0,4);
+    if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+    setExpiry(v);
+  }
+  
+  // —–– Manejo de envío del pago —––
+  const handlePagoSubmit = e => {
+    e.preventDefault();
+    fetch('/reservation/update/status', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reservationId: popupPagoAbierto,
+        reservationStatus: 'PAGADA'
+      })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Error al procesar pago');
+      return res.json();
+    })
+    .then(() => {
+      alert('Pago exitoso');
+      setPopupPagoAbierto(null);
+      // refresca tu lista si es necesario
+    })
+    .catch(err => {
+      console.error(err);
+      alert('No se pudo procesar el pago.');
+    });
+  };
+  useEffect(() => {
+  if (usuario) {
+    if (usuario.userRole === 'SUPER') {
+      navigate('/admin');
+    }
+  }
+}, [usuario, navigate]);
+  
   return (
     <div className="App">
       <header className="App-header">
@@ -359,7 +381,6 @@ const handleBuscar = () => {
         </div>
         {perfilAbierto && (
   <div
-    className="pestana-emergente"
     style={{
       position: 'absolute',
       top: '50px',
@@ -790,24 +811,35 @@ const handleBuscar = () => {
                 >
                   Cancelar reservación
                 </button>
-                <button
-                  className='boton'
-                  style={{ marginLeft: '8px' }}
-                  onClick={() => {
-                    // Open edit form for this reservation
-                    setEditingReservation(r);
-                    // Prefill form fields
-                    const matchedType = roomTypes.find(rt => rt.name === r.roomType);
-                    setResRoomTypeId(matchedType ? matchedType.id.toString() : '');
-                    setResRoomsCount(r.number);
-                    setResCheckIn(r.checkIn);
-                    setResCheckOut(r.checkOut);
-                    setResPromoCode(r.newDiscountCode || '');
-                    setPopupEditForm(true);
-                  }}
-                >
-                  Modificar reservación
-                </button>
+                {r.reservationStatus === 'PENDIENTE' && (
+                  <>
+                    <button
+                      className='boton'
+                      style={{ marginLeft: '8px' }}
+                      onClick={() => {
+                        // Open edit form for this reservation
+                        setEditingReservation(r);
+                        // Prefill form fields
+                        const matchedType = roomTypes.find(rt => rt.name === r.roomType);
+                        setResRoomTypeId(matchedType ? matchedType.id.toString() : '');
+                        setResRoomsCount(r.number);
+                        setResCheckIn(r.checkIn);
+                        setResCheckOut(r.checkOut);
+                        setResPromoCode(r.newDiscountCode || '');
+                        setPopupEditForm(true);
+                      }}
+                    >
+                      Modificar reservación
+                    </button>
+                    <button
+                      className="boton"
+                      style={{ marginLeft: '8px' }}
+                      onClick={() => setPopupPagoAbierto(r.reservationId)}
+                    >
+                      Pagar reservación
+                    </button>
+                  </>
+                )}
               </li>
             ))}
           </ul>
@@ -825,7 +857,6 @@ const handleBuscar = () => {
             position: 'fixed',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%)',
             background: '#fff',
             color: '#222',
             borderRadius: '10px',
@@ -881,151 +912,88 @@ const handleBuscar = () => {
             <input type="text" value={resPromoCode} onChange={e => setResPromoCode(e.target.value)} /><br/>
             <div style={{ marginTop: '20px' }}>
               <button type="submit" className="boton-buscar-popup">Guardar Cambios</button>
-              <button type="button" onClick={() => setPopupEditForm(false)}>Cancelar</button>
+              <button className="boton-buscar-popup" onClick={() => setPopupEditForm(false)}>Cancelar</button>
             </div>
           </form>
         </div>
       )}
+      {/* Popup de pago de reservación */}
+      {popupPagoAbierto && (
+  <div className="pestana-emergente">
+    <h3>Pago de reservación #{popupPagoAbierto}</h3>
+    <form onSubmit={handlePagoSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* 1. Número de tarjeta */}
+      <label>Número de la tarjeta</label>
+      <input
+        type="text"
+        value={cardNumber}
+        onChange={formatCardNumber}  // función que da forma 1234-5678-...
+        maxLength={19}
+        required
+      />
+      {/* 2. Fecha de caducidad */}
+      <label>Fecha de caducidad</label>
+      <input
+        type="text"
+        placeholder="MM/AA"
+        value={expiry}
+        onChange={formatExpiry}      // función que inserta la “/”
+        maxLength={5}
+        required
+      />
+      {/* 3. Titular */}
+      <label>Titular de la tarjeta</label>
+      <input
+        type="text"
+        value={cardHolder}
+        onChange={e => setCardHolder(e.target.value)}
+        required
+      />
+      {/* 4. Tipo */}
+      <label>Tipo de tarjeta</label>
+      <select
+        value={cardType}
+        onChange={e => setCardType(e.target.value)}
+        required
+      >
+        <option value="">Seleccione</option>
+        <option>Visa</option>
+        <option>MasterCard</option>
+        <option>American Express</option>
+      </select>
+      {/* 5. CVV */}
+      <label>CVV</label>
+      <input
+        type="password"
+        value={cvv}
+        onChange={e => {
+          const v = e.target.value.replace(/\D/g,'').slice(0,3);
+          setCvv(v);
+        }}
+        maxLength={3}
+        required
+      />
+
+      <div style={{ marginTop: 20 }}>
+        <button type="submit" className="boton-buscar-popup">
+          Pagar
+        </button>
+        <button
+          type="button"
+          className="boton"
+          onClick={() => setPopupPagoAbierto(null)}
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+)}
       </header>
 
       {/* Popups modales login / registro se implementarán en pasos posteriores */}
 
       <main style={{ paddingTop: "60px" }}>
-        <div className="funciones" style={{ display: 'flex', gap: '20px', justifyContent: 'center', margin: '20px 0' }}>
-          {/* Botón destino */}
-          <div style={{ position: 'relative' }}>
-            <button
-              className="funcion-boton"
-              onClick={() => setPestanaActiva(pestanaActiva === 'destino' ? null : 'destino')}
-            >
-              <img src="https://img.icons8.com/ios-filled/50/ffffff/airport.png" alt="avión" />
-              ¿A dónde vas?
-            </button>
-
-            {pestanaActiva === 'destino' && (
-              <div
-                className="popup-destinos"
-                style={{
-                  position: 'absolute',
-                  top: '50px',
-                  left: 0,
-                  background: '#fff',
-                  borderRadius: '10px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                  padding: '20px',
-                  zIndex: 2000,
-                  width: '240px',
-                  maxHeight: '300px',
-                  overflowY: 'auto'
-                }}
-              >
-                <h3 className="popup-titulo">Destinos Populares</h3>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                  {allCities.map((city, idx) => (
-                    <li
-                      key={idx}
-                      className={`popup-item ${destinoSeleccionado === city ? 'seleccionado' : ''}`}
-                      style={{ padding: '8px', borderBottom: '1px solid #eee', cursor: 'pointer' }}
-                      onClick={() => {
-                        setDestinoSeleccionado(city);
-                        setPestanaActiva(null);
-                      }}
-                    >
-                      <img
-                        src="https://img.icons8.com/ios-filled/24/f9c300/marker.png"
-                        alt="ubicación"
-                        className="icono-ubicacion"
-                      />
-                      <span>{city}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* Botón fechas */}
-          <div style={{ position: 'relative' }}>
-            <button
-              className="funcion-boton"
-              onClick={() => setPestanaActiva(pestanaActiva === 'fechas' ? null : 'fechas')}
-            >
-              <img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png" alt="calendario" />
-              {llegada && salida
-                ? `${new Date(llegada).toLocaleDateString()} - ${new Date(salida).toLocaleDateString()}`
-                : 'Llegada - Salida'}
-            </button>
-
-            {pestanaActiva === 'fechas' && (
-              <div className="pestana-emergente" style={{ position: 'absolute', top: '50px', left: 0 }}>
-                <label>
-                  <b>Llegada:</b>
-                  <input
-                    type="datetime-local"
-                    className="campo-fecha"
-                    value={llegada}
-                    onChange={e => setLlegada(e.target.value)}
-                  />
-                </label>
-                <br />
-                <label>
-                  <b>Salida:</b>
-                  <input
-                    type="datetime-local"
-                    className="campo-fecha"
-                    value={salida}
-                    onChange={e => setSalida(e.target.value)}
-                  />
-                </label>
-              </div>
-            )}
-          </div>
-
-          {/* Botón personas */}
-          <div style={{ position: 'relative' }}>
-            <button
-              className="funcion-boton"
-              onClick={() => setPestanaActiva(pestanaActiva === 'personas' ? null : 'personas')}
-            >
-              <img src="https://img.icons8.com/ios-filled/50/ffffff/conference.png" alt="personas" />
-              Niños - Adultos - Habitaciones
-            </button>
-
-            {pestanaActiva === 'personas' && (
-              <div className="pestana-emergente-huespedes">
-                <div className="fila-huespedes">
-                  <span className="etiqueta">Adultos</span>
-                  <div className="control">
-                    <button onClick={() => setAdultos(Math.max(1, adultos - 1))}>-</button>
-                    <span>{adultos}</span>
-                    <button onClick={() => setAdultos(adultos + 1)}>+</button>
-                  </div>
-                </div>
-                <hr />
-                <div className="fila-huespedes">
-                  <span className="etiqueta">Niños</span>
-                  <div className="control">
-                    <button onClick={() => setNinos(Math.max(0, ninos - 1))}>-</button>
-                    <span>{ninos}</span>
-                    <button onClick={() => setNinos(ninos + 1)}>+</button>
-                  </div>
-                </div>
-                <hr />
-                <div className="fila-huespedes">
-                  <span className="etiqueta">Habitaciones</span>
-                  <div className="control">
-                    <button onClick={() => setHabitaciones(Math.max(1, habitaciones - 1))}>-</button>
-                    <span>{habitaciones}</span>
-                    <button onClick={() => setHabitaciones(habitaciones + 1)}>+</button>
-                  </div>
-                </div>
-                <button className="boton-buscar-popup" onClick={handleBuscar}>Buscar</button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <hr style={{ border: '2px solid #000', margin: '25px 0' }} />
         <Carousel />
       </main>
 

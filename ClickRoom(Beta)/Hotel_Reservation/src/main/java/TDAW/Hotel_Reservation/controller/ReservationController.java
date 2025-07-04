@@ -5,6 +5,7 @@ import TDAW.Hotel_Reservation.dto.reservation.ReservationDTO;
 import TDAW.Hotel_Reservation.dto.reservation.ReservationNewStatus;
 import TDAW.Hotel_Reservation.dto.reservation.ReservationResponse;
 import TDAW.Hotel_Reservation.dto.reservation.ReservationUpdateDTO;
+import TDAW.Hotel_Reservation.dto.room.RoomTypeDTO;
 import TDAW.Hotel_Reservation.entity.promotion.Promotion;
 import TDAW.Hotel_Reservation.entity.reservation.ReservationStatus;
 import TDAW.Hotel_Reservation.service.clases.ReservationService;
@@ -46,6 +47,11 @@ public class ReservationController {
     @GetMapping("/search/date/{date}")
     private ResponseEntity<?> FindByDate(@PathVariable LocalDate date){
         return ResponseEntity.ok(reservationService.getReservationsByDate(date));
+    }
+
+    @PostMapping("/search/status")
+    private ResponseEntity<?> FindByStatus(@RequestBody ReservationNewStatus reservationNewStatus) {
+        return ResponseEntity.ok(reservationService.getReservationsByStatus(reservationNewStatus.reservationStatus()));
     }
 
     @PutMapping("/update")
